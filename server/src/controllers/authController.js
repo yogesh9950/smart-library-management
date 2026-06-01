@@ -133,7 +133,7 @@ const register = async (req, res) => {
 
     // SEND OTP EMAIL
 
-    await transporter.sendMail({
+   /* await transporter.sendMail({
       from: process.env.EMAIL_USER,
 
       to: email,
@@ -151,7 +151,8 @@ const register = async (req, res) => {
           </p>
         </div>
       `,
-    });
+    }); */
+    console.log("OTP:", otp);
 
     return res.status(201).json({
       message:
