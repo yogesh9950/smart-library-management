@@ -20,6 +20,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json({ limit: '5mb' }));
 
 // ==============================
@@ -27,7 +28,9 @@ app.use(express.json({ limit: '5mb' }));
 // ==============================
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -46,10 +49,32 @@ app.get('/api/health', (_req, res) => {
 });
 
 // ==============================
-// TEST EMAIL ROUTE
+// SMTP TEST ROUTE
 // ==============================
 
 app.get('/test-mail', async (_req, res) => {
+  try {
+    await transporter.verify();
+
+    res.json({
+      success: true,
+      message: 'SMTP Connected Successfully ✅',
+    });
+  } catch (error) {
+    console.error('SMTP ERROR:', error);
+
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+// ==============================
+// EMAIL SEND TEST ROUTE
+// ==============================
+
+app.get('/send-test-mail', async (_req, res) => {
   try {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -61,11 +86,17 @@ app.get('/test-mail', async (_req, res) => {
       `,
     });
 
-    res.send('Mail Sent Successfully ✅');
+    res.json({
+      success: true,
+      message: 'Mail Sent Successfully ✅',
+    });
   } catch (error) {
-    console.error(error);
+    console.error('MAIL ERROR:', error);
 
-    res.status(500).send('Email Failed ❌');
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
@@ -75,17 +106,17 @@ app.get('/test-mail', async (_req, res) => {
 
 app.use('/api/auth', authRoutes);
 
-app.use(
-  '/api/books',
-  requireDatabase,
-  bookRoutes
-);
+app.use('/api/books', requireDatabase, bookRoutes);
 
-app.use(
-  '/api/issues',
-  requireDatabase,
-  issueRoutes
-);
+app.use('/api/issues', requireDatabase, issueRoutes);
+
+// ==============================
+// ROOT ROUTE
+// ==============================
+
+app.get('/', (req, res) => {
+  res.send('Smart Library API Running Successfully 🚀');
+});
 
 // ==============================
 // ERROR HANDLER
@@ -97,9 +128,6 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({
     message: 'Internal server error',
   });
-});
-app.get('/', (req, res) => {
-  res.send('Smart Library API Running Successfully 🚀');
 });
 
 module.exports = app;
