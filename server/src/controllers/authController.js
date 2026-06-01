@@ -3,7 +3,9 @@ const nodemailer = require('nodemailer');
 
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
+const { Resend } = require('resend');
 
+const resend = new Resend(process.env.RESEND_API_KEY);
 // =====================================
 // MAIL CONFIG
 // =====================================
@@ -131,28 +133,15 @@ const register = async (req, res) => {
       isVerified: false,
     });
 
-    // SEND OTP EMAIL
-
-   /* await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-
-      to: email,
-
-      subject: 'Smart Library OTP Verification',
-
-      html: `
-        <div style="font-family:sans-serif;padding:20px;">
-          <h1>Smart Library OTP</h1>
-
-          <h2>${otp}</h2>
-
-          <p>
-            OTP valid for 5 minutes.
-          </p>
-        </div>
-      `,
-    }); */
-    console.log("OTP:", otp);
+   await resend.emails.send({
+  from: 'onboarding@resend.dev',
+  to: email,
+  subject: 'Smart Library OTP Verification',
+  html: `
+    <h2>Your OTP: ${otp}</h2>
+    <p>This OTP is valid for 5 minutes.</p>
+  `,
+});
 
     return res.status(201).json({
       message:
