@@ -93,5 +93,8 @@ app.use((err, _req, res, _next) => {
     message: 'Internal server error',
   });
 });
+app.get('/', (req, res) => {
+  res.send('Smart Library API Running Successfully 🚀');
+});
 
 module.exports = app;

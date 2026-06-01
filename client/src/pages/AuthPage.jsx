@@ -4,7 +4,7 @@ import axios from 'axios';
 import { BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = 'https://smart-library-api-1e3s.onrender.com/api/auth';
 
 const initialForm = {
   name: '',
